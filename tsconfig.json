@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist/",
+        "baseUrl": "./src/",
+        "noImplicitAny": false,
+        "target": "esnext",
+        "allowJs": true
+    }
+}
