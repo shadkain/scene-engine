@@ -16,10 +16,11 @@ export class Collector {
         this._config = config;
     }
 
-    public collect() {
+    public collect(): Collector {
         this.collectBase(schema.BaseSchemaType.video, this._config.video);
-
         this.collectCollection(this._config.collection);
+
+        return this;
     }
 
     private collectCollection(collection: Entry[]) {

@@ -9,9 +9,11 @@ export class Collector {
         this._config = config;
     }
 
-    public collect() {
+    public collect(): Collector {
         this._config.collection.forEach(entry => {
             this.storage.set(entry);
         });
+
+        return this;
     }
 }
