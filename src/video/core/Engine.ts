@@ -1,54 +1,32 @@
 import * as video from 'video/index';
 
 export class Engine {
-    private _active: video.Component;
-    private _clip: video.Clip;
-    private _rafId: number;
-    private _last: number;
+    private _service: video.Service;
+    private _current: video.Clip;
+    private _isPlaying: boolean;
 
-    constructor() {
-        this._clip = new video.Clip(, 25);
-        this._clip.element.className = 'video';
-        document.querySelector('#root').appendChild(this._clip.element);
+    constructor(service: video.Service) {
+        this._service = service;
     }
 
     public play() {
-        this._clip.element.play();
-        var self = this;
-        this._rafId = requestAnimationFrame(function f() {
-            const frame = self._clip.frame;
-            if (frame > self._last) {
-                self._active.emit(frame);
-                self._last = frame;
-            }
+        this._current.play();
 
-            self._rafId = requestAnimationFrame(f);
-        });
+        this._isPlaying = true;
     }
 
     public pause() {
-        this._clip.element.pause();
-        cancelAnimationFrame(this._rafId);
+        this._current.play();
+
+        this._isPlaying = false;
     }
 
-    public setActiveVideo(entry: video.StorageEntry) {
-        if (this._active) {
-            this._active.reset();
-        }
-        this._last = -1;
+    public setClip(clip: video.Clip) {
+        const prevClip = this._current;
+        this._current = clip;
 
-        const newClip = new video.Clip(document.createElement('video'), entry.component.info.fps);
-        newClip.element.className = 'video';
-        newClip.element.src = entry.resource.url;
-        newClip.element.play();
+        if (this._isPlaying) this.play();
 
-        this._clip.element.replaceWith(newClip.element);
-        this._clip = newClip;
-
-        this._active = entry.component;
-        this._active.prepare();
-        this._active.start();
-
-        this._clip.element.addEventListener('ended', this._active.finish.bind(this._active));
+        this._service.releaseResource(prevClip.name);
     }
 }

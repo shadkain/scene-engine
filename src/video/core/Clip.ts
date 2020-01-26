@@ -1,10 +1,10 @@
 import * as video from 'video/index';
 
 export class Clip {
-    readonly element: HTMLVideoElement;
     private _frameEval: video.FrameEvaluator;
     private _component: video.Component;
     private _resource: video.Resource;
+    readonly element: HTMLVideoElement;
 
     constructor(resource: video.Resource, fps: number) {
         this.element = document.createElement('video');
@@ -23,8 +23,23 @@ export class Clip {
         this.element.currentTime = this._frameEval.toTime(value);
     }
 
-    public attachComponent(component: video.Component) {
+    get name(): string {
+        return this._component.info.name;
+    }
+
+    public play() {
+        this.element.play();
+    }
+
+    public pause() {
+        this.element.pause();
+    }
+
+    public attachComponent(component: video.Component): video.Clip {
         this._component = component;
+        this._component.init();
+
+        return this;
     }
 
     public destroy() {

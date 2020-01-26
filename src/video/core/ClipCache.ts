@@ -7,10 +7,12 @@ type Entry = {
 }
 
 export class ClipCache {
+    private _service: video.Service;
     private _cache: tools.Cache<string, Entry>;
     private _loader: video.Loader;
 
-    constructor(loader: video.Loader) {
+    constructor(service: video.Service, loader: video.Loader) {
+        this._service = service;
         this._cache = new tools.Cache();
         this._loader = loader;
 
@@ -27,6 +29,7 @@ export class ClipCache {
         }
 
         entry.retainer.retain();
+
         return entry.clip;
     }
 
@@ -39,13 +42,14 @@ export class ClipCache {
 
     private createEntry(name: string) {
         const pair = this._loader.load(name);
+        const component = new video.Component(this._service, pair.info);
         const clip = new video.Clip(pair.resource, pair.info.fps);
         
         this._cache.set(name, {
             retainer: new tools.Retainer().on(tools.RetainerEvent.fullRelease, () => {
                 this._cache.delete(name);
             }).retain(),
-            clip: clip,
+            clip: clip.attachComponent(component),
         });
 
         return clip;

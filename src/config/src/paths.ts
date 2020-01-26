@@ -6,7 +6,7 @@ const BASE_PATH = path.resolve(window.__dirname, '..');
 const ASSETS_PATH = path.resolve(BASE_PATH, 'assets');
 const VIDEO_PATH = path.resolve(ASSETS_PATH, 'video');
 const VIDEO_RESOURCE_PATH = path.resolve(VIDEO_PATH, 'resource');
-const VIDEO_DESCRIPTION_PATH = path.resolve(VIDEO_PATH, 'description');
+const VIDEO_DESCRIPTION_PATH = path.resolve(VIDEO_PATH, 'info');
 const VIDEO_SCHEMA_PATH = path.resolve(VIDEO_PATH, 'schema');
 
 export const paths: app.PathConfig = {
