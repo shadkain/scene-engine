@@ -13,7 +13,7 @@ implements video.Action {
     public charge() {
         console.log(`transition prepared:`);
         console.log(this.info);
-        this._component.service.requestVideo(this.info.to);
+        this._component.service.retainResource(this.info.to);
     }
 
     public uncharge() {
