@@ -20,13 +20,14 @@ export class ClipCache {
         });
     }
 
-    public retain(name: string) {
+    public retain(name: string): video.Clip {
         const entry = this._cache.get(name);
         if (!entry) {
             return this.createEntry(name);
         }
 
         entry.retainer.retain();
+        return entry.clip;
     }
 
     public release(name: string) {
@@ -38,11 +39,15 @@ export class ClipCache {
 
     private createEntry(name: string) {
         const pair = this._loader.load(name);
+        const clip = new video.Clip(pair.resource, pair.info.fps);
+        
         this._cache.set(name, {
             retainer: new tools.Retainer().on(tools.RetainerEvent.fullRelease, () => {
                 this._cache.delete(name);
             }).retain(),
-            clip: new video.Clip(pair.resource, pair.info.fps),
+            clip: clip,
         });
+
+        return clip;
     }
 }
