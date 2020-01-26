@@ -4,7 +4,8 @@ export const enum CacheEvent {
     delete
 }
 
-export class Cache<K, V> {
+export class Cache<K, V>
+implements event.BoxUser<CacheEvent> {
     private _map: Map<K, V>;
     private _eventBox: event.Box<CacheEvent>;
 

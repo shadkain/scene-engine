@@ -4,7 +4,8 @@ export const enum RetainerEvent {
     fullRelease
 }
 
-export class Retainer {
+export class Retainer
+implements event.BoxUser<RetainerEvent> {
     private _strength: number;
     private _eventBox: event.Box<RetainerEvent>;
 
