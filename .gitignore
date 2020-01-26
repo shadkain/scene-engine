@@ -1,6 +1,6 @@
 # node
-node_modules
+/node_modules/
 
 # video resources
-assets/mov
-assets/video/resource
+/assets/mov/
+/assets/video/resource/
