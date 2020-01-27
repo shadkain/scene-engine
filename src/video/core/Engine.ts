@@ -2,31 +2,44 @@ import * as video from 'video/index';
 
 export class Engine {
     private _service: video.Service;
-    private _current: video.Clip;
-    private _isPlaying: boolean;
+    private _current: video.Clip[];
+    private _isActive: boolean;
 
     constructor(service: video.Service) {
         this._service = service;
+        this._current = [];
     }
 
     public play() {
-        this._current.play();
-
-        this._isPlaying = true;
+        this._current.forEach(clip => {
+            clip.play();
+        });
+        this._isActive = true;
     }
 
     public pause() {
-        this._current.play();
-
-        this._isPlaying = false;
+        this._current.forEach(clip => {
+            clip.pause();
+        });
+        this._isActive = false;
     }
 
-    public setClip(clip: video.Clip) {
-        const prevClip = this._current;
-        this._current = clip;
+    public addClip(clip: video.Clip) {
+        if (this._isActive) clip.play();
+        this._current.push(clip);
+    }
 
-        if (this._isPlaying) this.play();
+    public replaceClip(clip: video.Clip) {
+        if (this._isActive) clip.play();
 
-        this._service.releaseResource(prevClip.name);
+        this.releaseCurrent();
+        this._current.push(clip);
+    }
+
+    private releaseCurrent() {
+        this._current.forEach(clip => {
+            this._service.releaseResource(clip.name);
+        });
+        this._current = [];
     }
 }
