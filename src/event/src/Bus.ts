@@ -1,8 +1,14 @@
+import * as event from 'event/index';
+
 export class Bus<K> {
     private _channels: Map<K, Set<Function>>;
 
     constructor() {
         this._channels = new Map();
+    }
+
+    public createService(): event.BusService<K> {
+        return new event.BusService(this);
     }
 
     public on(key: K, handler: Function) {
