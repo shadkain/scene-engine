@@ -1,13 +1,12 @@
 // Core
 export * from './core/Service';
 export * from './core/Engine';
-export * from './core/Storage';
-export * from './core/StorageController';
 export * from './core/Resource';
 export * from './core/Loader';
 // Clip
 export * from './clip/Clip';
 export * from './clip/FrameEvaluator';
+export * from './clip/FrameEmitter';
 export * from './clip/ClipCache';
 // Component
 export * from './component/Component';

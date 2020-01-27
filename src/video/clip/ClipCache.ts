@@ -43,13 +43,13 @@ export class ClipCache {
     private createEntry(name: string) {
         const pair = this._loader.load(name);
         const component = new video.Component(this._service, pair.info);
-        const clip = new video.Clip(pair.resource, pair.info.fps);
+        const clip = new video.Clip(pair.resource, component);
         
         this._cache.set(name, {
             retainer: new tools.Retainer().on(tools.RetainerEvent.fullRelease, () => {
                 this._cache.delete(name);
             }).retain(),
-            clip: clip.attachComponent(component),
+            clip: clip,
         });
 
         return clip;

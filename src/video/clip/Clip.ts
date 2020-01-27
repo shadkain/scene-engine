@@ -1,60 +1,66 @@
 import * as video from 'video/index';
 
 export class Clip {
-    private _frameEval: video.FrameEvaluator;
-    private _component: video.Component;
     private _resource: video.Resource;
+    private _frameEvaluator: video.FrameEvaluator;
+    private _frameEmitter: video.FrameEmitter;
+    readonly component: video.Component;
     readonly element: HTMLVideoElement;
 
-    constructor(resource: video.Resource, fps: number) {
+    constructor(resource: video.Resource, component: video.Component) {
+        this._resource = resource;
+        this._frameEvaluator = new video.FrameEvaluator(component.info.fps);
+        this._frameEmitter = new video.FrameEmitter(this);
+        this.component = component;
         this.element = document.createElement('video');
 
-        this._frameEval = new video.FrameEvaluator(fps);
-        this._resource = resource;
-
-        this.element.src = resource.url;
+        this.initElement();
+        this.initComponent();
     }
 
     get frame(): number {
-        return this._frameEval.toFrame(this.element.currentTime);
+        return this._frameEvaluator.toFrame(this.element.currentTime);
     }
 
     set frame(value: number) {
-        this.element.currentTime = this._frameEval.toTime(value);
+        this.element.currentTime = this._frameEvaluator.toTime(value);
     }
 
     get name(): string {
-        return this._component.info.name;
+        return this.component.info.name;
     }
 
     public play() {
         this.element.play();
+        this._frameEmitter.start();
     }
 
     public pause() {
         this.element.pause();
-    }
-
-    public attachComponent(component: video.Component): video.Clip {
-        this._component = component;
-        this._component.init();
-
-        return this;
+        this._frameEmitter.stop();
     }
 
     public destroy() {
         this._resource.destroy();
-
-        if (this._component) {
-            this._component.destroy();
-        }
+        this.component.destroy();
     }
 
-    // Static methods
-    static fromComponent(resource: video.Resource, component: video.Component): Clip {
-        const clip = new Clip(resource, component.info.fps);
-        clip.attachComponent(component);
+    private initComponent() {
+        this.component.init();
 
-        return clip;
+        let wasPlayed = false;
+        this.element.addEventListener('play', () => {
+            if (!wasPlayed) {
+                this.component.begin();
+                this._frameEmitter.init(this.frame);
+
+                wasPlayed = true;
+            }
+        });
+        this.element.addEventListener('ended', this.component.end.bind(this.component));
+    }
+
+    private initElement() {
+        this.element.src = this._resource.url;
     }
 }
