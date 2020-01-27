@@ -24,6 +24,8 @@ implements app.Application {
         this.assembleValidatorService();
         this.assembleVideoService();
         this.assembleDisplayService();
+
+        this.configureVideoService();
     }
 
     private assembleValidatorService() {
@@ -50,5 +52,11 @@ implements app.Application {
     private assembleDisplayService() {
         this.root = document.querySelector('#root');
         this.displayService = new display.Service(this.root);
+    }
+
+    private configureVideoService() {
+        this.videoService.on(video.ServiceEvent.transition, (clip) => {
+            this.displayService.show(clip.element);
+        });
     }
 }
