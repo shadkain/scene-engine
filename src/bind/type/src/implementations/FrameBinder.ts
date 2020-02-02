@@ -1,8 +1,8 @@
-import * as v from 'validators/index';
+import * as bind from 'bind/index';
 
-export class FrameValidator
-implements v.type.TypeValidator {
-    validate(data: any): v.Result {
+export class FrameBinder
+implements bind.type.Binder {
+    public bind(data: any): bind.Result {
         if (typeof(data) !== 'number') {
             return { ok: false };
         }

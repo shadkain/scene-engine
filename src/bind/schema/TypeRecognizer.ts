@@ -1,4 +1,4 @@
-export const enum TypeId {
+export const enum SlaveBinderType {
     primitive,
     constrained,
     object,
@@ -6,17 +6,17 @@ export const enum TypeId {
 }
 
 export class TypeRecognizer {
-    private _types: Map<TypeId, string>;
+    private _types: Map<SlaveBinderType, string>;
 
     constructor() {
         this._types = new Map();
         this._types
-            .set(TypeId.constrained, '<>')
-            .set(TypeId.object, '{}')
-            .set(TypeId.array, '[]');
+            .set(SlaveBinderType.constrained, '<>')
+            .set(SlaveBinderType.object, '{}')
+            .set(SlaveBinderType.array, '[]');
     }
 
-    public recognize(type: string): { typeId: TypeId, retrievedType: string } {
+    public recognize(type: string): { binderType: SlaveBinderType, retrievedType: string } {
         const entries = this._types.entries();
 
         let res = entries.next();
@@ -24,13 +24,13 @@ export class TypeRecognizer {
             const [key, braces] = res.value;
             if (type[0] === braces[0] && type[type.length - 1] === braces[1]) {
                 return {
-                    typeId: key,
+                    binderType: key,
                     retrievedType: type.slice(1, type.length - 1),
                 }
             }
             res = entries.next();
         }
 
-        return { typeId: TypeId.primitive, retrievedType: type };
+        return { binderType: SlaveBinderType.primitive, retrievedType: type };
     }
 }

@@ -1,8 +1,13 @@
-import * as v from 'validators/index';
+import * as bind from 'bind/index';
 import * as video from 'video/index';
 
-export class FrameTimecodeValidator
-implements v.type.TypeValidator {
+const enum KeyWords {
+    begin = 'begin',
+    end = 'end',
+}
+
+export class FrameTimecodeBinder
+implements bind.type.Binder {
     private _fps: number;
 
     constructor(fps: number) {
@@ -17,7 +22,7 @@ implements v.type.TypeValidator {
         this._fps = value;
     }
 
-    validate(data: any): v.Result {
+    public bind(data: any): bind.Result {
         if (typeof(data) !== 'string') {
             return { ok: false };
         }
@@ -50,15 +55,15 @@ implements v.type.TypeValidator {
         return Number.isInteger(value) && value >= 0;
     }
 
-    private checkKeywords(data: string): v.Result {
+    private checkKeywords(data: string): bind.Result {
         switch (data) {
-            case 'begin':
+            case KeyWords.begin:
                 return {
                     ok: true,
                     cache: video.Moment.begin
                 };
 
-            case 'end':
+            case KeyWords.end:
                 return {
                     ok: true,
                     cache: video.Moment.end

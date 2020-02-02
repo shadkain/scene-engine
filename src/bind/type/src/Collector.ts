@@ -1,11 +1,11 @@
-import * as v from 'validators/index';
+import * as bind from 'bind/index';
 
 export class Collector {
-    readonly storage: v.type.Storage;
-    private _config: v.type.Config;
+    readonly storage: bind.type.Storage;
+    private _config: bind.type.Config;
 
-    constructor(config: v.type.Config) {
-        this.storage = new v.type.Storage();
+    constructor(config: bind.type.Config) {
+        this.storage = new bind.type.Storage();
         this._config = config;
     }
 

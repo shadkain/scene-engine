@@ -1,4 +1,4 @@
-export type PropertyTypePair = {
+export type PropTypePair = {
     prop: any,
     type: string,
 }
