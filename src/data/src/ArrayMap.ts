@@ -43,8 +43,23 @@ export class ArrayMap<K, V> {
         return array.pop();
     }
 
-    public forEach(callback: (array: V[], key: K) => void) {
+    public forEach(callback: (value: V, index: number, key: K) => void) {
+        this._map.forEach((array, key) => {
+            array.forEach((value, index) => {
+                callback(value, index, key);
+            });
+        });
+    }
+
+    public forEachArray(callback: (array: V[], key: K) => void) {
         this._map.forEach(callback);
+    }
+
+    public forEachForKey(key: K, callback: (value: V, index: number) => void) {
+        const array = this._map.get(key);
+        if (!array) return;
+
+        array.forEach(callback);
     }
 
     public clear() {
