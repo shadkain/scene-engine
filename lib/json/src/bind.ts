@@ -28,34 +28,34 @@ export function bind<T>(jsonObject: Object, ctr: json.EmptyConstructor<T>): T {
     return target;
 }
 
-function bindArray(jsonObject: any, info: json.PropMetadata<any>): any[] {
+function bindArray(jsonObject: any, meta: json.PropMetadata<any>): any[] {
     if (!(jsonObject instanceof Array)) {
-        throw new json.WrongInstanceError(info.key, 'array');
+        throw new json.WrongInstanceError(meta.key, 'array');
     }
 
-    const binderFunc = info.isObject() ? bindObject : bindPrimitive;
+    const binderFunc = meta.isObject() ? bindObject : bindPrimitive;
     jsonObject.forEach((element, i) => {
-        jsonObject[i] = binderFunc(element, info);
+        jsonObject[i] = binderFunc(element, meta);
     });
 
     return jsonObject;
 }
 
-function bindObject(jsonObject: any, info: json.PropMetadata<any>): Object {
+function bindObject(jsonObject: any, meta: json.PropMetadata<any>): Object {
     if (!(jsonObject instanceof Object)) {
-        throw new json.WrongInstanceError(info.key, 'object');
+        throw new json.WrongInstanceError(meta.key, 'object');
     }
 
     try {
-        return bind(jsonObject, info.getConstructor());
+        return bind(jsonObject, meta.getConstructor());
     } catch (e) {
-        throw new json.InnerObjectError(info.key, e);
+        throw new json.InnerObjectError(meta.key, e);
     }
 }
 
-function bindPrimitive(prop: any, info: json.PropMetadata<any>): json.PrimitiveType {
-    if (typeof(prop) !== info.getTypeof()) {
-        throw new json.WrongTypeError(info.key, info.getTypeof(), typeof(prop));
+function bindPrimitive(prop: any, meta: json.PropMetadata<any>): json.PrimitiveType {
+    if (typeof(prop) !== meta.getTypeof()) {
+        throw new json.WrongTypeError(meta.key, meta.getTypeof(), typeof(prop));
     }
 
     return prop;
