@@ -12,8 +12,12 @@ export function bind<T>(jsonObject: Object, ctr: json.EmptyConstructor<T>): T {
         const propMeta = json.mustGetPropertyMetadata(target, targetKey);
 
         const prop = jsonObject[propMeta.key];
-        if (prop == null && !propMeta.nullable) {
-            throw new json.BindError(`required property key "${propMeta.key}" is null or missing`);
+        if (prop == null) {
+            if (!propMeta.nullable) {
+                throw new json.BindError(`required property key "${propMeta.key}" is null or missing`);
+            }
+            
+            return;
         }
         
         if (propMeta.isArray()) {
