@@ -8,13 +8,12 @@ import * as json from '../pkg';
 export function bind<T>(jsonObject: Object, ctr: json.Constructor<T>): T {
     const target = new ctr();
 
-    json.meta.mustGet(ctr).forEachProperty((targetKey, propMeta) => {
+    json.meta.mustGetNotAbstract(ctr).forEachProperty((targetKey, propMeta) => {
         const prop = jsonObject[propMeta.key];
         if (prop == null) {
             if (!propMeta.nullable) {
                 throw new json.PropertyMissingError(propMeta.key);
             }
-            
             return;
         }
         

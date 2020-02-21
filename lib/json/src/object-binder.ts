@@ -33,10 +33,6 @@ export const objectBinder = new class {
     }
 
     private callBind(ctr: json.Constructor) {
-        if (json.meta.mustGet(ctr).abstract) {
-            throw new json.BindToAbstractError(ctr.name);
-        }
-
         return json.bind(this._jsonObject, ctr);
     }
 }

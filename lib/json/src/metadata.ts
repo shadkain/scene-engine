@@ -34,6 +34,15 @@ export const meta = new class {
         return meta;
     }
 
+    public mustGetNotAbstract(target: json.Constructor): json.ObjectMetadata {
+        const meta = this.mustGet(target);
+        if (meta.abstract) {
+            throw new json.BindToAbstractError(target.name);
+        }
+
+        return meta;
+    }
+
     public mustGetCtrByTag(target: json.Constructor, tag: string): json.Constructor {
         const ctr = this.mustGet(target).getDerivedCtr(tag);
         if (!ctr) {
