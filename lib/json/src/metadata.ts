@@ -1,60 +1,45 @@
-import 'reflect-metadata';
 import * as json from '../pkg';
 
-// const JSON_METADATA_SYMBOL = Symbol('json-metadata-symbol');
-const JSON_METADATA_SYMBOL = 'json';
+export const meta = new class {
+    private _map: Map<json.Constructor, json.ObjectMetadata>;
 
-export function getPropertyMetadata(target: Object, propertyKey: string): json.PropMetadata<any> {
-    const propMeta = Reflect.getMetadata(JSON_METADATA_SYMBOL, target, propertyKey);
-    return propMeta && propMeta instanceof json.PropMetadata ? propMeta : null;
-}
-
-export function setPropertyMetadata<T>(meta: json.PropMetadata<T>, target: Object, propertyKey: string) {
-    Reflect.defineMetadata(JSON_METADATA_SYMBOL, meta, target, propertyKey);
-}
-
-export function getObjectMetadata(target: Object): json.ObjectMetadata {
-    const objMeta = Reflect.getMetadata(JSON_METADATA_SYMBOL, target);
-    return objMeta && objMeta instanceof json.ObjectMetadata ? objMeta : null;
-}
-
-export function setObjectMetadata(meta: json.ObjectMetadata, target: Object) {
-    Reflect.defineMetadata(JSON_METADATA_SYMBOL, meta, target);
-}
-
-export function mustGetPropertyMetadata(target: Object, propertyKey: string): json.PropMetadata<any> {
-    const propMeta = getPropertyMetadata(target, propertyKey);
-    if (!propMeta) {
-        throw new json.BindError(`property info has wrong type or missing`);
+    constructor() {
+        this._map = new Map();
     }
 
-    return propMeta;
-}
-
-export function mustGetObjectMetadata(target: Object): json.ObjectMetadata {
-    const objMeta = getObjectMetadata(target);
-    if (!objMeta) {
-        throw new json.BindError(`object metadata for class "${target.constructor.name}" has wrong type or missing`);
+    public get(target: json.Constructor): json.ObjectMetadata {
+        return this._map.get(target);
     }
 
-    return objMeta;
-}
-
-export function mustGetObjectProperties(target: Object): Set<string> {
-    const objMeta = mustGetObjectMetadata(target);
-    if (!objMeta.props) {
-        throw new json.BindError(`property set for class "${target.constructor.name}" is missing`);
+    public set(target: json.Constructor, meta: json.ObjectMetadata) {
+        this._map.set(target, meta);
     }
 
-    return objMeta.props;
-}
+    public getOrCreate(target: json.Constructor): json.ObjectMetadata {
+        let meta = this.get(target);
+        if (!meta) {
+            meta = new json.ObjectMetadata();
+            this.set(target, meta);
+        }
 
-export function mustGetConstructorByTag(target: Object, tag: string): json.EmptyConstructor<Object> {
-    const objMeta = mustGetObjectMetadata(target);
-    const ctr = objMeta.ctrs?.get(tag);
-    if (!ctr) {
-        throw new json.BindError(`no class assosiated with tag: "${tag}"`);
+        return meta;
     }
 
-    return ctr;
+    public mustGet(target: json.Constructor): json.ObjectMetadata {
+        const meta = this.get(target);
+        if (!meta) {
+            throw new json.BindError(`no metadata for class "${target.name}"`);
+        }
+
+        return meta;
+    }
+
+    public mustGetCtrByTag(target: json.Constructor, tag: string): json.Constructor {
+        const ctr = this.mustGet(target).getDerivedCtr(tag);
+        if (!ctr) {
+            throw new json.NonexistentTagError(tag);
+        }
+
+        return ctr;
+    }
 }

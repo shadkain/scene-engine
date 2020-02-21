@@ -1,3 +1,6 @@
+/**
+ * Object used to set global binder settings.
+ */
 export const settings = new class {
     private _tagKey: string;
     private _autoDetectDerived: boolean;

@@ -5,79 +5,67 @@ import * as json from '../pkg';
  * @param jsonObject Json-object.
  * @param ctr Class constructor.
  */
-export function bind<T>(jsonObject: Object, ctr: json.EmptyConstructor<T>): T {
+export function bind<T>(jsonObject: Object, ctr: json.Constructor<T>): T {
     const target = new ctr();
 
-    json.mustGetObjectProperties(target).forEach((targetKey) => {
-        const propMeta = json.mustGetPropertyMetadata(target, targetKey);
-
+    json.meta.mustGet(ctr).forEachProperty((targetKey, propMeta) => {
         const prop = jsonObject[propMeta.key];
         if (prop == null) {
             if (!propMeta.nullable) {
-                throw new json.BindError(`required property key "${propMeta.key}" is null or missing`);
+                throw new json.PropertyMissingError(propMeta.key);
             }
             
             return;
         }
         
         if (propMeta.isArray()) {
-            target[targetKey] = bindArray(prop, propMeta);
+            target[targetKey] = wrapError(prop, propMeta, bindArray);
         } else if (!propMeta.isObject()) {
-            target[targetKey] = bindPrimitive(prop, propMeta);
+            target[targetKey] = wrapError(prop, propMeta, bindPrimitive);
         } else {
-            target[targetKey] = bindObject(prop, propMeta);
+            target[targetKey] = wrapError(prop, propMeta, bindObject);
         }
-    });
+    }); 
 
     return target;
 }
 
-function bindArray(jsonObject: any, meta: json.PropMetadata<any>): any[] {
+function wrapError(prop: any, meta: json.PropMetadata, binderFunc: (prop: any, meta: json.PropMetadata) => any) {
+    try {
+        return binderFunc(prop, meta);
+    } catch(e) {
+        throw new json.ObjectError(meta.key, e);
+    }
+}
+
+function bindArray(jsonObject: any, meta: json.PropMetadata): any[] {
     if (!(jsonObject instanceof Array)) {
-        throw new json.WrongInstanceError(meta.key, 'array');
+        throw new json.WrongInstanceError('array');
     }
 
     const binderFunc = meta.isObject() ? bindObject : bindPrimitive;
     jsonObject.forEach((element, i) => {
-        jsonObject[i] = binderFunc(element, meta);
+        try {
+            jsonObject[i] = binderFunc(element, meta);
+        } catch(e) {
+            throw new json.ArrayError(i, e);
+        }
     });
 
     return jsonObject;
 }
 
-function bindObject(jsonObject: any, meta: json.PropMetadata<any>): Object {
+function bindObject(jsonObject: any, meta: json.PropMetadata): Object {
     if (!(jsonObject instanceof Object)) {
-        throw new json.WrongInstanceError(meta.key, 'object');
+        throw new json.WrongInstanceError('object');
     }
 
-    return bindDerivedOrOrdinary(jsonObject, meta);
+    return json.objectBinder.bind(jsonObject, meta);
 }
 
-function bindDerivedOrOrdinary(jsonObject: Object, meta: json.PropMetadata<Object>): Object {
-    let ctr = meta.getConstructor();
-    
-    const tag = jsonObject[json.settings.tagKey];
-    if (tag != null) {
-        checkTag(tag);
-        ctr = json.mustGetConstructorByTag(ctr.prototype, tag);
-    }
-
-    try {
-        return bind(jsonObject, ctr);
-    } catch (e) {
-        throw new json.InnerObjectError(meta.key, e);
-    }
-}
-
-function checkTag(tag: any) {
-    if (typeof(tag) !== 'string') {
-        throw new json.WrongTypeError(json.settings.tagKey, 'string', typeof(tag));
-    }
-}
-
-function bindPrimitive(prop: any, meta: json.PropMetadata<any>): json.PrimitiveType {
+function bindPrimitive(prop: any, meta: json.PropMetadata): json.PrimitiveType {
     if (typeof(prop) !== meta.getTypeof()) {
-        throw new json.WrongTypeError(meta.key, meta.getTypeof(), typeof(prop));
+        throw new json.WrongTypeError(meta.getTypeof());
     }
 
     return prop;

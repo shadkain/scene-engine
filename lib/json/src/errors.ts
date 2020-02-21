@@ -4,28 +4,90 @@ extends Error {
         super(message);
         this.name = 'BindError';
     }
+
+    public getMessage(): string {
+        return this.message;
+    }
+}
+
+abstract class ChainError
+extends BindError {
+    constructor(message: string, next: BindError) {
+        super(message + next.getMessage());
+    }
+}
+
+export class ObjectError
+extends ChainError {
+    constructor(key: string, next: BindError) {
+        super(`"${key}"`, next);
+        this.name = 'ObjectError';
+    }
+
+    public getMessage(): string {
+        return ` -> ${this.message}`;
+    }
+}
+
+export class ArrayError
+extends ChainError {
+    constructor(index: number, next: BindError) {
+        super(`[${index}]`, next);
+        this.name = 'ArrayError';
+    }
+}
+
+abstract class FinalError
+extends BindError {
+    public getMessage(): string {
+        return `: ${this.message}`;
+    }
+}
+
+export class PropertyMissingError
+extends FinalError {
+    constructor(key: string) {
+        super(`property for key "${key}" is null or missing`);
+        this.name = 'PropertyMissingError';
+    }
 }
 
 export class WrongInstanceError
-extends BindError {
-    constructor(key: string, instance: string) {
-        super(`property for key "${key}" is not an ${instance}`);
+extends FinalError {
+    constructor(instance: string) {
+        super(`property is not an "${instance}"`);
         this.name = 'WrongInstanceError';
     }
 }
 
 export class WrongTypeError
-extends BindError {
-    constructor(key: string, expected: string, actual: string) {
-        super(`property for key "${key}" has wrong type`+'\n'+`expected: "${expected}"`+'\n'+`actual: "${actual}"`);
+extends FinalError {
+    constructor(expected: string) {
+        super(`property type must be "${expected}"`);
         this.name = 'WrongTypeError';
     }
 }
 
-export class InnerObjectError
-extends BindError {
-    constructor(key: string, error: BindError) {
-        super(`binding inner object for key "${key}" failed`+'\n'+`${error.message}`);
-        this.name = 'InnerObjectError';
+export class WrongTagTypeError
+extends FinalError {
+    constructor() {
+        super(`tag key type must be "string"`);
+        this.name = 'WrongTagTypeError';
+    }
+}
+
+export class NonexistentTagError
+extends FinalError {
+    constructor(tag: string) {
+        super(`no class assosiated with tag "${tag}"`);
+        this.name = 'NonexistentTagError';
+    }
+}
+
+export class BindToAbstractError
+extends FinalError {
+    constructor(className: string) {
+        super(`trying to bind to abstract class "${className}"`);
+        this.name = 'BindToAbstractError';
     }
 }

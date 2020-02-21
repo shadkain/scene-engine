@@ -1,28 +1,33 @@
 export type PrimitiveTypeof = 'string' | 'number' | 'boolean';
 export type PrimitiveType = string | number | boolean;
 
-export interface EmptyConstructor<T> {
+export interface Constructor<T = Object>
+extends Object {
     new(): T;
 }
 
-type PropType<T> = PrimitiveTypeof | EmptyConstructor<T>;
+export interface Prototype {
+    constructor: Function;
+}
 
-export interface IPropMetadata<T> {
+type PropType = PrimitiveTypeof | Constructor;
+
+export interface IPropMetadata {
     key: string;
-    type: PropType<T> | [PropType<T>];
+    type: PropType | [PropType];
     nullable?: boolean;
 }
 
-export class PropMetadata<T> {
+export class PropMetadata {
     key: string;
     nullable?: boolean;
-    private _type: PropType<T>;
+    private _type: PropType;
     private _isObject: boolean;
     private _isArray: boolean;
 
-    constructor(meta: IPropMetadata<T>) {
+    constructor(meta: IPropMetadata) {
         this.key = meta.key;
-        this.nullable = meta.nullable;
+        if (meta.nullable) this.nullable = meta.nullable;
         this.retrieveType(meta.type);
     }
 
@@ -38,11 +43,11 @@ export class PropMetadata<T> {
         return this._type as PrimitiveTypeof;
     }
 
-    public getConstructor(): EmptyConstructor<T> {
-        return this._type as EmptyConstructor<T>;
+    public getCtr(): Constructor {
+        return this._type as Constructor;
     }
 
-    private retrieveType(typeContainer: PropType<T> | [PropType<T>]) {
+    private retrieveType(typeContainer: PropType | [PropType]) {
         if (typeContainer instanceof Array) {
             this._isArray = true;
             this._type = typeContainer[0];
