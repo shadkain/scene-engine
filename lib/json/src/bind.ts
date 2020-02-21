@@ -46,10 +46,28 @@ function bindObject(jsonObject: any, meta: json.PropMetadata<any>): Object {
         throw new json.WrongInstanceError(meta.key, 'object');
     }
 
+    return bindDerivedOrOrdinary(jsonObject, meta);
+}
+
+function bindDerivedOrOrdinary(jsonObject: Object, meta: json.PropMetadata<Object>): Object {
+    let ctr = meta.getConstructor();
+    
+    const tag = jsonObject[json.settings.tagKey];
+    if (tag != null) {
+        checkTag(tag);
+        ctr = json.mustGetConstructorByTag(ctr.prototype, tag);
+    }
+
     try {
-        return bind(jsonObject, meta.getConstructor());
+        return bind(jsonObject, ctr);
     } catch (e) {
         throw new json.InnerObjectError(meta.key, e);
+    }
+}
+
+function checkTag(tag: any) {
+    if (typeof(tag) !== 'string') {
+        throw new json.WrongTypeError(json.settings.tagKey, 'string', typeof(tag));
     }
 }
 

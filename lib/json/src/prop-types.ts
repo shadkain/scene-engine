@@ -20,10 +20,10 @@ export class PropMetadata<T> {
     private _isObject: boolean;
     private _isArray: boolean;
 
-    constructor(info: IPropMetadata<T>) {
-        this.key = info.key;
-        this.nullable = this.nullable;
-        this.retrieveType(info.type);
+    constructor(meta: IPropMetadata<T>) {
+        this.key = meta.key;
+        this.nullable = meta.nullable;
+        this.retrieveType(meta.type);
     }
 
     public isObject(): boolean {

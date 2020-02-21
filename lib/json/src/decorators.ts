@@ -21,7 +21,7 @@ export function prop<T>(iPropMeta: json.IPropMetadata<T>) {
  */
 export function derived<T>(derivedMeta: json.DerivedMetadata<T>) {
     return (target: json.EmptyConstructor<T>) => {
-        const objectMeta = getOrCreateObjectInfo(derivedMeta.base);
+        const objectMeta = getOrCreateObjectInfo(derivedMeta.base.prototype);
         objectMeta.setCtr(derivedMeta.tag, target);
     }
 }
